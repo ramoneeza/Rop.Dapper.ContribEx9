@@ -23,16 +23,12 @@ public static partial class ConnectionHelper
         var result = connection.Query<T>(sql,null,transaction,true,commandTimeout);
         return result;
     }
-    private static List<T> _intGetSomeSlim<T>(this IDbConnection conn, string lst, IDbTransaction? tr = null) where T : class
-    {
-        var keyd = DapperHelperExtend.GetKeyDescription(typeof(T));
-        var sql = DapperHelperExtend.SelectGetAllSlimCache(typeof(T));
-        return conn.Query<T>($"{sql} WHERE {keyd.KeyName} IN ({lst})", null, tr).ToList();
-    }
     public static List<T> GetSomeSlim<T>(this IDbConnection conn, IEnumerable ids, IDbTransaction? tr = null) where T : class
     {
         var lst = DapperHelperExtend.GetIdListDyn(ids);
-        return _intGetSomeSlim<T>(conn, lst, tr);
+        var keyd = DapperHelperExtend.GetKeyDescription(typeof(T));
+        var sql = DapperHelperExtend.SelectGetAllSlimCache(typeof(T));
+        return conn.Query<T>($"{sql} WHERE {keyd.KeyName} IN ({lst})", null, tr).ToList();
     }
 
     public static List<T> GetWhereSlim<T>(this IDbConnection conn, string where, object? param=null, IDbTransaction? tr = null) where T : class
@@ -56,5 +52,19 @@ public static partial class ConnectionHelper
         var sql = DapperHelperExtend.SelectGetAllSlimCache(type);
         var result = await connection.QueryAsync<T>(sql,null,transaction,commandTimeout).ConfigureAwait(false);
         return result;
+    }
+    public static async Task<List<T>> GetSomeSlimAsync<T>(this IDbConnection conn, IEnumerable ids, IDbTransaction? tr = null) where T : class
+    {
+        var lst = DapperHelperExtend.GetIdListDyn(ids);
+        var keyd = DapperHelperExtend.GetKeyDescription(typeof(T));
+        var sql = DapperHelperExtend.SelectGetAllSlimCache(typeof(T));
+        var r = await conn.QueryAsync<T>($"{sql} WHERE {keyd.KeyName} IN ({lst})", null, tr);
+        return r.ToList();
+    }
+    public static async Task<List<T>> GetWhereSlimAsync<T>(this IDbConnection conn, string where, object? param=null, IDbTransaction? tr = null) where T : class
+    {
+        var sql = DapperHelperExtend.SelectGetAllSlimCache(typeof(T));
+        var r=await conn.QueryAsync<T>($"{sql} WHERE {@where}",param, tr);
+        return r.ToList();
     }
 }

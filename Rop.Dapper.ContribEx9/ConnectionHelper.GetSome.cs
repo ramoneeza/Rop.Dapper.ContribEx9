@@ -6,21 +6,17 @@ namespace Rop.Dapper.ContribEx9;
 
 public static partial class ConnectionHelper
 {
-    private static List<T> IntGetSome<T>(this IDbConnection conn, string lst, IDbTransaction? tr = null,int? commandTimeout=null) where T : class
-    {
-        var keyd = DapperHelperExtend.GetKeyDescription(typeof(T));
-        return conn.Query<T>($"SELECT * FROM {keyd.TableName} WHERE {keyd.KeyName} IN ({lst})", null, tr,true,commandTimeout).ToList();
-    }
-
+    
     public static List<T> GetSome<T>(this IDbConnection conn, IEnumerable ids, IDbTransaction? tr = null, int? commandTimeout = null) where T : class
     {
         var lst = DapperHelperExtend.GetIdListDyn(ids);
-        return IntGetSome<T>(conn, lst, tr,commandTimeout);
+        var keyd = DapperHelperExtend.GetAnyKeyDescription(typeof(T))??throw new ArgumentException($"Type {typeof(T)} has not valid keys");
+        return conn.Query<T>($"SELECT * FROM {keyd.TableName} WHERE {keyd.KeyName} IN ({lst})", null, tr,true,commandTimeout).ToList();
     }
 
     public static List<T> GetWhere<T>(this IDbConnection conn, string where, object? param=null, IDbTransaction? tr = null, int? commandTimeout = null) where T : class
     {
-        var keyd = DapperHelperExtend.GetKeyDescription(typeof(T));
+        var keyd = DapperHelperExtend.GetAnyKeyDescription(typeof(T)) ?? throw new ArgumentException($"Type {typeof(T)} has not valid keys");
         return conn.Query<T>($"SELECT * FROM {keyd.TableName} WHERE {@where}",param, tr,true,commandTimeout).ToList();
     }
     public static IEnumerable<(dynamic id, T value)> QueryIdValue<TA, T>(this IDbConnection conn, string field, string where, object? param=null, IDbTransaction? tr = null, int? commandTimeout = null)
@@ -69,23 +65,17 @@ public static partial class ConnectionHelper
 
     // Async
 
-    private static async Task<List<T>> IntGetSomeAsync<T>(this IDbConnection conn, string lst, IDbTransaction? tr = null,int? timeout=null) where T : class
-    {
-        var keyd = DapperHelperExtend.GetKeyDescription(typeof(T));
-        return (await conn.QueryAsync<T>($"SELECT * FROM {keyd.TableName} WHERE {keyd.KeyName} IN ({lst})", null, tr,timeout)).ToList();
-    }
-
     public static async Task<List<T>> GetSomeAsync<T>(this IDbConnection conn, IEnumerable ids, IDbTransaction? tr = null,int? timeout=null) where T : class
     {
-        var keyd = DapperHelperExtend.GetKeyDescription(typeof(T));
         var lst = DapperHelperExtend.GetIdListDyn(ids);
+        var keyd = DapperHelperExtend.GetAnyKeyDescription(typeof(T)) ?? throw new ArgumentException($"Type {typeof(T)} has not valid keys");
         var q= await conn.QueryAsync<T>($"SELECT * FROM {keyd.TableName} WHERE {keyd.KeyName} IN ({lst})", null, tr, timeout);
         return q.ToList();
     }
         
     public static async Task<List<T>> GetWhereAsync<T>(this IDbConnection conn, string where, object? param=null, IDbTransaction? tr = null,int? timeout=null) where T : class
     {
-        var keyd = DapperHelperExtend.GetKeyDescription(typeof(T));
+        var keyd = DapperHelperExtend.GetAnyKeyDescription(typeof(T)) ?? throw new ArgumentException($"Type {typeof(T)} has not valid keys");
         var q = await conn.QueryAsync<T>($"SELECT * FROM {keyd.TableName} WHERE {@where}", param, tr, timeout);
         return q.ToList();
     }

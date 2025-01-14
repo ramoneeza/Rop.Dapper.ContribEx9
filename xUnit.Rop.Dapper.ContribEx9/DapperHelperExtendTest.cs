@@ -22,7 +22,6 @@ namespace xUnit.Rop.Dapper.ContribEx9
         {
             Id = 1,
             Name = "Ford",
-            Computed = "America"
         };
         private ObjectX _createObjectX()=>new ObjectX()
         {
@@ -73,13 +72,13 @@ namespace xUnit.Rop.Dapper.ContribEx9
         public void TypePropertiesCacheTest()
         {
             var properties = DapperHelperExtend.TypePropertiesCache(typeof(Car));
-            Assert.Equal(new []{ "Id","Name","Computed" },properties.Select(p=>p.Name));
+            Assert.Equal(["Id","Name","Maniobras"],properties.Select(p=>p.Name));
         }
         [Fact]
         public void ComputedPropertiesCacheTest()
         {
             var properties = DapperHelperExtend.ComputedPropertiesCache(typeof(Car));
-            Assert.Equal(new []{ "Computed" },properties.Select(p=>p.Name));
+            Assert.Equal(["Maniobras"],properties.Select(p=>p.Name));
             properties = DapperHelperExtend.ComputedPropertiesCache(typeof(ObjectX));
             Assert.Empty(properties);
         }

@@ -26,7 +26,6 @@ namespace xUnit.Rop.Dapper.ContribEx9
         {
             Id = id,
             Name = "Ford",
-            Computed = "America"
         };
         private ObjectX _createObjectX(string id = "MyKey") => new ObjectX()
         {
@@ -40,19 +39,16 @@ namespace xUnit.Rop.Dapper.ContribEx9
             {
                 Id = 1,
                 Name = "Ford",
-                Computed = "America"
             };
             var c2 = new Car()
             {
                 Id = 2,
                 Name = "Ford",
-                Computed = "Europe"
             };
             var c3 = new Car()
             {
                 Id = 3,
                 Name = "Renault",
-                Computed = "Europe"
             };
             return (c1, c2, c3);
         }
@@ -247,8 +243,51 @@ namespace xUnit.Rop.Dapper.ContribEx9
                     Assert.Equal(c2.Age, cr2.Age);
                 
             }
-
         }
+        [Fact]
+        public void InsertOrUpdateAutoKey2()
+        {
+
+            var c1 = new User() { Id = 0, Name = "Ford", Age = 20 };
+            var c2 = new User() { Id = 0, Name = "Seat", Age = 25 };
+            using (var conn = GetOpenConnection())
+            {
+       
+
+                conn.Execute("DELETE FROM users");
+                var k1 = conn.InsertOrUpdateMerge(c1);
+                DapperHelperExtend.SetKeyValue(c1, k1);
+                var cr1 = conn.Get<User>(k1);
+                Assert.Equal(c1.Id, cr1.Id);
+                Assert.Equal(c1.Name, cr1.Name);
+                Assert.Equal(c1.Age, cr1.Age);
+                DapperHelperExtend.SetKeyValue(c2, k1);
+                conn.InsertOrUpdateMerge(c2);
+                var cr2 = conn.Get<User>(1);
+                Assert.Equal(c2.Id, cr2.Id);
+                Assert.Equal(c2.Name, cr2.Name);
+                Assert.Equal(c2.Age, cr2.Age);
+        
+            }
+        }
+
+        //[Fact]
+        //public void MergeExplicitKey()
+        //{
+        //    var x = new ObjectZ() { Id = 3, Name = "Hola" };
+        //    var y=new ObjectZ() { Id = 3, Name = "Adios" };
+        //    using var conn = GetOpenConnection();
+        //    conn.Execute("DELETE FROM ObjectZ");
+        //    var k1=conn.InsertOrUpdateMerge(x);
+        //    Assert.Equal(3,k1);
+        //    var x2 = conn.Get<ObjectZ>(3);
+        //    Assert.Equal("Hola", x2.Name);
+        //    var k2 = conn.InsertOrUpdateMerge(y);
+        //    Assert.Equal(3, k2);
+        //    var y2 = conn.Get<ObjectZ>(3);
+        //    Assert.Equal("Adios", y2.Name);
+        //}
+        
         [Fact]
         public void UpdateIdValueText()
         {

@@ -5,15 +5,17 @@ namespace xUnit.Rop.Dapper.ContribEx9.Data
 {
     public class PartialKey1
     {
-        [PartialKey]
+        [PartialKey(0)]
         public string PKey { get; set; }
+        [PartialKey(1)]
         public string Key2 { get; set; }
         public string Data { get; set; }
     }
     public class Maniobra
     {
-        [PartialKey]
+        [PartialKey(0)]
         public int PKey { get; set; }
+        [PartialKey(1)]
         public int Key2 { get; set; }
         public string Grupo { get; set; }
     }

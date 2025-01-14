@@ -23,6 +23,53 @@ public static partial class DapperHelperExtend
         if (keyCount != 1) throw new InvalidOperationException($"Type {t} has not single key");
         return (keys.Count > 0) ? (keys[0], true) : (explicitKeys[0], false);
     }
+    
+    public static bool TryGetKey(Type t,out PropertyInfo? propkey,out PropertyInfo? propkey2,out bool isautokey,out bool ispartial)
+    {
+        if (t == null) throw new ArgumentNullException(nameof(t));
+        var keys = KeyPropertiesCache(t);
+        var explicitKeys = ExplicitKeyPropertiesCache(t);
+        var keyCount = keys.Count + explicitKeys.Count;
+        if (keyCount == 1)
+        {
+            ispartial = false;
+            propkey2 = null;
+            if (keys.Count > 0)
+            {
+                propkey = keys[0];
+                isautokey = true;
+            }
+            else
+            {
+                propkey = explicitKeys[0];
+                isautokey = false;
+            }
+            return true;
+        }
+        var partialKeys = _partialKeyProperties(t);
+        if (partialKeys.Count<2 || keyCount>1)
+        {
+            propkey = null;
+            propkey2 = null;
+            ispartial = false;
+            isautokey = false;
+            return false;
+        }
+        propkey = partialKeys[0];
+        propkey2 = partialKeys[1];
+        isautokey = false;
+        ispartial = true;
+        return true;
+    }
+    public static KeyDescription? GetAnyKeyDescription(Type t)
+    {
+        if (TryGetKey(t, out var _, out var _, out var isautokey, out var ispartial))
+        {
+            return ispartial? GetPartialKeyDescription(t) : GetKeyDescription(t);
+        }
+        return null;
+    }
+
     /// <summary>
     /// Get Key Description for class of type t
     /// </summary>
@@ -30,20 +77,16 @@ public static partial class DapperHelperExtend
     /// <returns>KeyDescription</returns>
     public static KeyDescription GetKeyDescription(Type t)
     {
-        if (KeyDescriptions.TryGetValue(t.TypeHandle, out var kd)) return kd;
-        var (propkey, isautokey) = GetSingleKey(t);
-        var keyname = propkey.Name;
-        var tname = GetTableName(t);
-        var fdb = GetForeignDatabaseName(t);
-        kd = fdb is null ? new KeyDescription(tname, keyname, isautokey, propkey) : new KeyDescription(fdb,tname, keyname, isautokey, propkey);
-        KeyDescriptions[t.TypeHandle]= kd;
-        return kd;
+        return KeyDescriptions.GetOrFactory(t, _ =>
+        {
+            var (propkey, isautokey) = GetSingleKey(t);
+            var keyname = propkey.Name;
+            var tname = GetTableName(t);
+            var fdb = GetForeignDatabaseName(t);
+            return new KeyDescription(tname, keyname,propkey, isautokey,fdb);
+        });
     }
-
-    public static KeyDescription GetKeyDescription<T>() where T:class
-    {
-        return GetKeyDescription(typeof(T));
-    }
+    public static KeyDescription GetKeyDescription<T>() where T:class => GetKeyDescription(typeof(T));
 
     /// <summary>
     /// Get Key Value for item
@@ -54,7 +97,6 @@ public static partial class DapperHelperExtend
     /// <exception cref="ArgumentNullException"></exception>
     public static object GetKeyValue<T>(T item)
     {
-        if (item == null) throw new ArgumentNullException(nameof(item));
         var kd = GetKeyDescription(typeof(T));
         return kd.KeyProp.GetValue(item)??throw new InvalidOperationException("Key is null value");
     }
@@ -67,7 +109,6 @@ public static partial class DapperHelperExtend
     /// <exception cref="ArgumentNullException"></exception>
     public static void SetKeyValue<T>(T item, object value)
     {
-        if (item == null) throw new ArgumentNullException(nameof(item));
         var kd = GetSingleKey(typeof(T));
         kd.propkey.SetValue(item, value);
     }
@@ -77,10 +118,10 @@ public static partial class DapperHelperExtend
     /// <typeparam name="T"></typeparam>
     /// <param name="item"></param>
     /// <returns>Key description and Key value</returns>
-    public static (KeyDescription keydescription, object value) GetKeyDescriptionAndValue<T>(T item)
+    public static (KeyDescription keydescription, object value) GetKeyDescriptionAndValue<T>(T item) where T: class
     {
-        var kd = GetKeyDescription(typeof(T));
-        var v = GetKeyValue(item);
+        var kd = GetKeyDescription<T>();
+        var v =kd.GetKeyValue(item)??throw new InvalidOperationException("Key is null value");
         return (kd, v);
     }
 

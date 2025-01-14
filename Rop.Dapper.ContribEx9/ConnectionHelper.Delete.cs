@@ -21,12 +21,6 @@ public static partial class ConnectionHelper
         var n = conn.Execute(sql, dynParams, tr, commandTimeout);
         return n;
     }
-
-    public static bool Delete<T>(this IDbConnection conn, IDbTransaction tr, dynamic key, int? commandTimeout = null)
-    {
-        return DeleteByKey<T>(conn, key, tr, commandTimeout);
-    }
-
     // Async 
     public static async Task<bool> DeleteByKeyAsync<T>(this IDbConnection conn, dynamic id, IDbTransaction? tr = null, int? commandTimeout = null)
     {
@@ -36,9 +30,12 @@ public static partial class ConnectionHelper
         var n = await conn.ExecuteAsync(sql, dynParams, tr, commandTimeout);
         return n > 0;
     }
-
-    public static Task<bool> DeleteAsync<T>(this IDbConnection conn, IDbTransaction tr, dynamic id, int? commandTimeout = null)
+    public static async Task<int> DeleteByPartialKeyAsync<T>(this IDbConnection conn, dynamic id, IDbTransaction? tr = null, int? commandTimeout = null)
     {
-        return DeleteByKeyAsync<T>(conn, id, tr, commandTimeout);
+        var sql = DapperHelperExtend.DeleteByPartialKeyCache(typeof(T));
+        var dynParams = new DynamicParameters();
+        dynParams.Add("@id", id);
+        var n = await conn.ExecuteAsync(sql, dynParams, tr, commandTimeout);
+        return n;
     }
 }

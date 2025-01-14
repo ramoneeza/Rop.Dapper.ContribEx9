@@ -36,7 +36,8 @@ public static partial class DapperHelperExtend
     private static readonly ConcurrentDictionary<RuntimeTypeHandle, string> GetSlimDic = new();
     private static readonly ConcurrentDictionary<RuntimeTypeHandle, string> GetPartialDic = new();
     private static readonly ConcurrentDictionary<RuntimeTypeHandle, string> DeleteByKeyDic = new();
-    private static readonly ConcurrentDictionary<RuntimeTypeHandle, string> DeleteByPartialKeyDic = new();    
+    private static readonly ConcurrentDictionary<RuntimeTypeHandle, string> DeleteByPartialKeyDic = new();
+    private static readonly ConcurrentDictionary<RuntimeTypeHandle, string> InsertNoKeyAttDic = new();
     static DapperHelperExtend()
     {
         ExplicitKeyPropertiesCacheInfo = GetInfo("ExplicitKeyPropertiesCache");

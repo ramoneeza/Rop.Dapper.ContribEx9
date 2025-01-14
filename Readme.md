@@ -1,12 +1,12 @@
-﻿# Rop.Dapper.ContribEx
+﻿# Rop.Dapper.ContribEx9
 
 Features
 --------
 
-Rop.Dapper.ContribEx includes a DapperHelperExtend class to access to hidden information about
+Rop.Dapper.ContribEx9 includes a DapperHelperExtend class to access to hidden information about
 classes and their attributes.
 
-Rop.Dapper.ContribEx adds more helper methods for inserting, getting,
+Rop.Dapper.ContribEx9 adds more helper methods for inserting, getting,
 updating and deleting records.
 
 ## DapperHelperExtend
@@ -116,6 +116,15 @@ Task<bool> UpdateIdValueAsync<TA, T>(this IDbConnection conn, dynamic id, T valu
 
 ```csharp
  List<T> QueryJoin<T, M>(this IDbConnection conn, string query, object param, Action<T, M> join, IDbTransaction tr = null);
+ ```
+
+ `PartialKey` methods
+ ```csharp
+ bool DeletePartialKey<T>(this IDbConnection conn, T item, IDbTransaction tr = null, int? commandTimeout = null);
+ IEnumerable<T> GetPartial<T>(this IDbConnection connection, dynamic id, IDbTransaction? transaction = null, int? commandTimeout = null);
+ (T,M1[]) GetLeftJoin<T,M1>(this IDbConnection connection,dynamic id, IDbTransaction? transaction = null, int? commandTimeout = null);
+ (T,M1[],M2[]) GetLeftJoin<T,M1,M2>(this IDbConnection connection,dynamic id, IDbTransaction? transaction = null, int? commandTimeout = null);
+ (T,M1[],M2[],M3[]) GetLeftJoin<T,M1,M2,M3>(this IDbConnection connection,dynamic id, IDbTransaction? transaction = null, int? commandTimeout = null);
  ```
 
  ------

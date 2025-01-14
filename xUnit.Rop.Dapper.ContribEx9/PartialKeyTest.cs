@@ -31,19 +31,19 @@ namespace xUnit.Rop.Dapper.ContribEx9
             {
                 Id = 1,
                 Name = "Ford",
-                Computed = "America"
+                
             };
             var c2 = new Car()
             {
                 Id = 2,
                 Name = "Ford",
-                Computed = "Europe"
+                
             };
             var c3 = new Car()
             {
                 Id = 3,
                 Name = "Renault",
-                Computed = "Europe"
+                
             };
             return (c1, c2, c3);
         }
@@ -124,11 +124,12 @@ namespace xUnit.Rop.Dapper.ContribEx9
             using var conn = GetOpenConnection();
             _insertCar(conn);
             _insertPartials(conn);
-            var (car, maniobras) = conn.GetLeftJoin<Car,Maniobra>(1);
+            var car = conn.GetLeftJoin<Car,Maniobra>(1);
+            Assert.NotNull(car);
             Assert.Equal(1,car.Id);
-            Assert.Equal(2, maniobras.Length);
-            Assert.Equal(1, maniobras[0].PKey);
-            Assert.Equal(1, maniobras[1].PKey);
+            Assert.Equal(2, car.Maniobras.Length);
+            Assert.Equal(1, car.Maniobras[0].PKey);
+            Assert.Equal(1, car.Maniobras[1].PKey);
         }
     }
 
